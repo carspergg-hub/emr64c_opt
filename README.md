@@ -1,39 +1,69 @@
 # emr64c_opt
 
-## Overview
+## 项目简介
 
-`emr64c_opt` is a performance optimization toolkit for EMR x86_64 environments, focusing on system-level tuning, CPU/memory efficiency, and runtime stability improvements for large-scale distributed workloads.
+`emr64c_opt` 是面向 EMR / x86_64 大数据环境的系统级性能优化工具集，主要用于沉淀生产环境中的性能调优经验，覆盖 CPU、内存、NUMA、网络与内核参数优化等方向。
 
-## Key Features
+该项目目标是为大规模分布式计算系统提供一套可复用、可验证、可推广的性能优化基线方法。
 
-- CPU affinity and NUMA-aware scheduling optimizations
-- Memory access and allocation tuning strategies
-- Kernel and network parameter optimization guidance
-- Baseline performance profiling templates for EMR workloads
-- Operational tuning presets for production environments
+## 核心能力
 
-## Typical Use Cases
+- CPU 亲和性与调度优化（affinity / cpuset）
+- NUMA 感知调度与内存绑定优化（membind / interleave）
+- 内核参数调优（sysctl / TCP / buffer / backlog）
+- 网络软中断与收发路径优化（RPS / RFS / IRQ balance）
+- 大数据运行时性能调优（JVM / Spark / Hive / Kafka）
 
-- Improving throughput for big data workloads (Spark / Hive / Kafka)
-- Reducing tail latency under high concurrency
-- Stabilizing CPU and memory utilization on dense nodes
-- Benchmarking different kernel / system parameter configurations
+## 典型场景
 
-## Usage
+- 提升 Spark / Hive / Flink 等任务吞吐能力
+- 降低 CPU sys / softirq 占比
+- 优化高并发场景尾延迟（p95 / p99）
+- 提升 NUMA 本地访问比例，减少跨节点访问开销
+- 稳定高密度云主机性能表现
 
-This repository is intended as a reference and toolkit collection. Typical workflow:
+## 目录结构建议
 
-1. Review recommended system parameters under `/configs`
-2. Apply tuning scripts in a controlled staging environment
-3. Validate performance using workload-specific benchmarks
-4. Gradually promote to production after stability verification
+```
+configs/   # sysctl / NUMA / CPU 调优配置
+scripts/   # 一键优化与回滚脚本
+bench/     # 性能压测与验证方法
+docs/      # 调优原理与经验总结
+```
 
-## Notes
+## 使用流程
 
-- Always validate changes in a non-production environment first
-- Some optimizations may be workload-specific
-- Monitor system metrics (CPU steal, softirq, memory pressure) after applying changes
+1. 在测试环境选择对应业务负载模型（计算 / 存储 / 网络）
+2. 应用 configs 或 scripts 中的优化策略
+3. 使用 bench 进行性能对比验证
+4. 监控关键指标（CPU steal、softirq、latency、throughput）
+5. 分批灰度上线并持续观察稳定性
 
-## License
+## 关键指标关注
 
-Internal use / organization-specific optimization toolkit (update as needed)
+- CPU steal 时间
+- softirq 占比
+- NUMA remote access ratio
+- p95 / p99 延迟
+- 吞吐量（QPS / jobs per hour）
+
+## 注意事项
+
+- 所有优化必须先在非生产环境验证
+- 不同 workload 需要差异化策略，避免“一刀切”
+- 部分优化可能提升局部指标但影响整体公平性
+- 建议建立优化前后 baseline 对比体系
+
+## 适用系统
+
+- Hadoop / Spark / Hive / Flink
+- Kafka / Pulsar 等消息系统
+- 云原生高密度计算节点
+- 分布式存储与计算集群
+
+## 后续规划
+
+- sysctl 标准参数库建设
+- NUMA / CPU 调度自动化工具
+- benchmark 自动化评估框架
+- 可视化性能对比报告生成
